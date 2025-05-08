@@ -7,17 +7,14 @@ function Keypad({ buttons, handleButtonClick }) {
         <>
             <div id="keypad">
             {buttons.map(({ id, value }) => {
-                // buttons span 2 columns
-                const gridColumn = (id === 'clear' || id === 'equals')
-                ? 'span 2'
-                : 'span 1';
+
                 return (
                 <Button
                     key={id}
                     id={id}
                     onClick={() => handleButtonClick(value)}
                     variant="secondary"
-                    style={{ gridColumn }}
+                    style={{ gridColumn: (id === 'clear' || id === 'equals') ? 'span 2' : 'span 1'}} // buttons span 2 columns
                 >
                     {value}
                 </Button>

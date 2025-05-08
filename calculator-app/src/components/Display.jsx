@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Display({result, calculation}) {
+function Display({calculation}) {
     return (
         <>
             <div id="display">{calculation || "0"}</div>

@@ -1,53 +1,60 @@
-#keypad {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); // creates 3 equal columns
-  gap: 10px; // space between grid items
-}
+// Variables
+$primary-color: #2a6a9b;
+$primary-hover-color: rgb(50, 125, 182);
+$background-color: #95bcdf;
+$text-color: #333;
+$calculator-bg: #f2f2f2;
+$display-bg: #222;
+$button-hover: #ddd;
 
-#display {
-  width: 100%;
-  background-color: bisque;
-}
-
-/* #root {
+// Global styles
+#root {
+  font-family: 'Arial', sans-serif;
+  background-color: $background-color;
+  color: $text-color;
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+// Calculator Container
+#calculator {
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: $calculator-bg;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+// Display Area
+#display {
+  background-color: $display-bg;
+  color: #fff;
+  font-size: 2rem;
+  padding: 10px;
+  text-align: right;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+// Keypad Grid
+#keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+// Button Styling
+button {
+  height: 60px;
+}
+
+//Link to Github
+p {
+  a {
+    text-decoration: none;
+    color: $primary-color;
+    font-weight: bold;
   }
-  to {
-    transform: rotate(360deg);
-  }
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-} */
