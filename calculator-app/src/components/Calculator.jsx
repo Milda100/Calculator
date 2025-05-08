@@ -4,107 +4,114 @@ import Keypad from './Keypad';
 import { buttons, isOperator } from './buttons';
 import Display from './Display';
 
-function Calculator() {
-    const [calculation, setCalculation] = useState("");
-    const [result, setResult] = useState("");
+// Helper function to get the trailing operator chain and its start index.
+const getTrailingOperatorChain = (calculation) => {
+  let i = calculation.length - 1;
+  let opChain = "";
+  while (i >= 0 && isOperator(calculation[i])) {
+    opChain = calculation[i] + opChain;
+    i--;
+  }
+  // Return the chain and the index where operators begin
+  return { opChain, startIndex: i + 1 };
+};
+// Helper function to get the current number segment (after the last operator).
+const getCurrentNumberSegment = (calculation) => {
+  const segments = calculation.split(/[\+\-\*\/]/);
+  return segments[segments.length - 1] || "";
+};
 
+const Calculator = () => {
+  const [calculation, setCalculation] = useState("");
+  const [result, setResult] = useState("");
 
-    const handleButtonClick = (value) => {
-      // Clear everything
-      if (value === "C") {
-        setCalculation("");
-        setResult("");
-      }
-      // When "=" is pressed, evaluate the expression
-      else if (value === "=") {
-        try {
-          // Evaluate and then update both calculation and result so that the result appears as the new base.
-          const evalResult = eval(calculation);
-          setCalculation(evalResult.toString());
-          setResult(evalResult.toString());
-        } catch (error) {
-          setCalculation("Error");
-          setResult("");
-        }
-      }
-      // When an operator is pressed
-      else if (isOperator(value)) {
-        // If there's no current calculation but a result exists, start a new expression
-        if (calculation === "" && result !== "") {
-          setCalculation(result.toString() + value);
-          setResult("");
-        }
-        // Otherwise, if there is a current calculation...
-        else if (calculation !== "") {
-          // Build the trailing operator chain
-          let i = calculation.length - 1;
-          let opChain = "";
-          while (i >= 0 && isOperator(calculation[i])) {
-            opChain = calculation[i] + opChain;
-            i--;
-          }
-          // If there is a trailing operator chain:
-          if (opChain.length > 0) {
-            // Special case: if the new operator is "-" and the trailing chain is exactly one operator
-            // (which is not already "-"), then allow appending to denote a negative number.
-            if (value === "-" && opChain.length === 1 && opChain[0] !== "-") {
-              setCalculation(calculation + value);
-            }
-            // Otherwise, replace the entire operator chain with the new operator.
-            else {
-              setCalculation(calculation.slice(0, i + 1) + value);
-            }
-          }
-          // In case no trailing operator exists (which is unlikely here) simply append
-          else {
-            setCalculation(calculation + value);
-          }
-        }
-      }
-     
-      // For digits or the decimal point:
-      else {
-        // If a result exists and it's equal to the current calculation,
-        // start a new calculation (discarding the previous evaluated value).
-        if (result !== "" && calculation === result.toString()) {
-          setCalculation(value.toString());
-          setResult("");
+  const handleClear = () => {
+    setCalculation("");
+    setResult("");
+  };
+
+  const handleEqual = () => {
+    try {
+      const evalResult = eval(calculation); // NOTE: For production, consider using a proper math parser.
+      // Set both as the new base for subsequent operations.
+      setCalculation(evalResult.toString());
+      setResult(evalResult.toString());
+    } catch (error) {
+      setCalculation("Error");
+      setResult("");
+    }
+  };
+
+  const handleOperator = (value) => {
+    // When there is no calculation but a previous result exists, start with the result:
+    if (calculation === "" && result !== "") {
+      setCalculation(result.toString() + value);
+      setResult("");
+      return;
+    }
+
+    if (calculation !== "") {
+      const { opChain, startIndex } = getTrailingOperatorChain(calculation);
+      if (opChain.length > 0) {
+        // Special case: allow negative sign concatenation if valid.
+        if (value === "-" && opChain.length === 1 && opChain[0] !== "-") {
+          setCalculation(calculation + value);
         } else {
-          const newChar = value.toString();
-          // Split the current calculation by the operators to get the current number segment.
-          const segments = calculation.split(/[\+\-\*\/]/);
-          const currentSegment = segments[segments.length - 1] || "";
-          
-          // If the user pressed the decimal point:
-          if (newChar === ".") {
-            // If the current number already has a decimal, do nothing.
-            if (currentSegment.includes(".")) {
-              return;
-            }
-            // If the current segment is empty, you might want to start with "0."
-            // For example, if the calculation is empty or ends with an operator.
-            if (currentSegment === "") {
-              setCalculation(calculation + "0.");
-              return;
-            }
-          }
-          
-          // Check for multiple leading zeros:
-          // If the current segment is exactly "0" and the new input is "0", do nothing.
-          if (currentSegment === "0" && newChar === "0") {
-            return;
-          }
-          // If the current segment is exactly "0" and the new input is not a decimal,
-          // replace the current "0" with the new character.
-          else if (currentSegment === "0" && newChar !== ".") {
-            setCalculation(calculation.slice(0, calculation.length - 1) + newChar);
-          } else {
-            // Otherwise, simply append the new character.
-            setCalculation((prev) => prev + newChar);
-          }
+          // Otherwise, replace the entire operator chain.
+          setCalculation(calculation.slice(0, startIndex) + value);
         }
+      } else {
+        // No trailing operator: simply append.
+        setCalculation(calculation + value);
       }
-          };
+    }
+  };
+
+  const handleDigitOrDecimal = (value) => {
+    // If the current displayed calculation is the evaluated result,
+    // start a new expression.
+    if (result !== "" && calculation === result.toString()) {
+      setCalculation(value.toString());
+      setResult("");
+      return;
+    }
+
+    const newChar = value.toString();
+    const currentSegment = getCurrentNumberSegment(calculation);
+  
+    // If the value is a decimal point, ensure one per number segment.
+    if (newChar === ".") {
+      if (currentSegment.includes(".")) {
+        return;
+      }
+      // If the current segment is empty (e.g. starting a new number), prepend a "0"
+      if (currentSegment === "") {
+        setCalculation(calculation + "0.");
+        return;
+      }
+    }
+
+    // Prevent multiple leading zeros.
+    if (currentSegment === "0" && newChar === "0") {
+      return;
+    } else if (currentSegment === "0" && newChar !== ".") {
+      setCalculation(calculation.slice(0, calculation.length - 1) + newChar);
+    } else {
+      setCalculation((prev) => prev + newChar);
+    }
+  };
+
+  const handleButtonClick = (value) => {
+    if (value === "C") {
+      handleClear();
+    } else if (value === "=") {
+      handleEqual();
+    } else if (isOperator(value)) {
+      handleOperator(value);
+    } else {
+      handleDigitOrDecimal(value);
+    }
+  };
 
   return (
     <>
