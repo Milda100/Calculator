@@ -15,8 +15,9 @@ https://www.freecodecamp.org/learn/front-end-development-libraries/front-end-dev
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/calculator.git
+   git clone https://github.com/Milda100/Calculator.git
 2. Navigate to the project directory:
+cd calculator-app
 npm install
 npm install react-bootstrap bootstrap
 npm install -g sass
